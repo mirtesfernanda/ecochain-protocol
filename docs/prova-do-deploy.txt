@@ -1,0 +1,41 @@
+======================================================
+  PROVA DE DEPLOY — EcoChain Protocol
+  Rede: Sepolia Testnet (Chain ID 11155111)
+  Owner: 0xB9c084Fd97B1d39B38daA92aC16c41a5D2d7B715
+======================================================
+
+1° Deploy - EcoToken
+  contract address : 0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5
+  tx hash          : 0x0b7d2c47d29a3b5b195025c85c9c1db184c91d2e9a9354ead3ce2127c315d999
+  block number     : 10692479
+  gas              : 1.294.221
+  initialOwner     : 0xB9c084Fd97B1d39B38daA92aC16c41a5D2d7B715
+
+2° Deploy - EcoStaking
+  contract address : 0xee24BB958aD56c5BAF4BF6ddb64cE43A802f2374
+  tx hash          : 0x4e593e383895c954baeb09659ea0b137d5bdc294222956ce48e345d6c73392f7
+  block number     : 10692558
+  gas              : 1.482.106
+  _ecoToken        : 0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5
+  _priceFeed       : 0x694AA1769357215DE4FAC081bf1f309aDC325306 (Chainlink ETH/USD Sepolia)
+  initialOwner     : 0xB9c084Fd97B1d39B38daA92aC16c41a5D2d7B715
+
+3° Deploy - EcoNFT
+  contract address : 0x9E8A87c068376cFE312E7c6F2d6d1cCF850866C4
+  tx hash          : 0x76f9a143dd756d0d5b60957b21fa764554bb2ed30ff6fc05f1490bb35b5d7501
+  block number     : 10692566
+  gas              : 2.259.423
+  initialOwner     : 0xB9c084Fd97B1d39B38daA92aC16c41a5D2d7B715
+
+4° Deploy - EcoDAO
+  contract address : 0x471A9Fbf68095418a86cE71d02347239F6928860
+  tx hash          : 0xa5a9bd684a034a100d0eced1c22581d5a1e93cf58e42ea951c143588a3f092c0
+  block number     : 10692573
+  gas              : 1.978.848
+  _ecoToken        : 0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5
+  initialOwner     : 0xB9c084Fd97B1d39B38daA92aC16c41a5D2d7B715
+
+======================================================
+  Todos os contratos conectados corretamente entre si.
+  priceFeed: Chainlink ETH/USD oficial da Sepolia
+======================================================

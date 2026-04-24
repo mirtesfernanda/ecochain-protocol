@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoChain Protocol — Web3 DApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080f0b;
+      --bg2:     #0d1a10;
+      --bg3:     #111e14;
+      --panel:   #0f1f13;
+      --border:  #1d3323;
+      --green:   #3ddc68;
+      --green2:  #22a84a;
+      --green-d: #0e4a23;
+      --amber:   #f0ac36;
+      --red:     #f05252;
+      --text:    #c8e8d0;
+      --text2:   #7a9e84;
+      --text3:   #4a6e52;
+      --mono:    'Space Mono', monospace;
+      --sans:    'Syne', sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;opacity:.25;}
+
+    header{position:sticky;top:0;z-index:100;background:rgba(8,15,11,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;gap:1.5rem;}
+    .logo{display:flex;align-items:center;gap:.7rem;font-family:var(--sans);font-weight:800;font-size:1.1rem;color:var(--green);}
+    .logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .logo-sub{font-size:.65rem;font-weight:400;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;}
+    nav{margin-left:auto;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+
+    .chip{font-family:var(--mono);font-size:.67rem;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--text2);background:var(--panel);}
+    .chip.net{border-color:var(--green-d);color:var(--green);}
+    .chip.warn{border-color:#5a3d00;color:var(--amber);}
+    .chip.err{border-color:#5a1a1a;color:var(--red);}
+
+    #btnConnect{font-family:var(--sans);font-weight:700;font-size:.78rem;padding:7px 18px;border-radius:8px;cursor:pointer;background:var(--green);color:var(--bg);border:none;transition:all .2s;white-space:nowrap;}
+    #btnConnect:hover{background:#4fff7a;}
+    #btnConnect:disabled{opacity:.5;cursor:default;}
+    #btnConnect.connected{background:var(--green-d);color:var(--green);border:1px solid var(--green2);}
+
+    main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+
+    #fileWarn{display:none;background:#1a1100;border:1px solid #5a3d00;border-radius:10px;padding:.9rem 1.2rem;font-size:.8rem;color:var(--amber);margin-bottom:1.5rem;line-height:1.7;}
+    #fileWarn code{background:#0f0a00;padding:2px 8px;border-radius:4px;font-family:var(--mono);}
+
+    #walletBar{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;}
+    .wstat-label{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:3px;}
+    .wstat-value{font-family:var(--mono);font-size:.8rem;color:var(--text);word-break:break-all;}
+    .wstat-value.hi{color:var(--green);font-weight:700;}
+
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+    .stat-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;}
+    .stat-box .lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);}
+    .stat-box .val{font-family:var(--mono);font-size:.95rem;color:var(--green);font-weight:700;margin-top:4px;}
+
+    .deploy-table{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;font-size:.77rem;}
+    .deploy-table h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:.8rem;}
+    .deploy-table table{width:100%;border-collapse:collapse;}
+    .deploy-table td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text2);}
+    .deploy-table td:first-child{color:var(--green);font-family:var(--mono);font-size:.7rem;white-space:nowrap;}
+    .deploy-table td code{font-family:var(--mono);color:#7ee89a;word-break:break-all;font-size:.7rem;}
+    .deploy-table a{color:#60a5fa;text-decoration:none;}
+    .deploy-table a:hover{text-decoration:underline;}
+
+    #addrSection{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;}
+    #addrSection h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:.8rem;}
+    .addr-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+    @media(max-width:600px){.addr-grid{grid-template-columns:1fr;}}
+
+    .sect-title{display:flex;align-items:center;gap:.6rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:1.2rem;margin-top:2rem;}
+    .sect-title::before,.sect-title::after{content:'';flex:1;height:1px;background:var(--border);}
+    .sect-title span{white-space:nowrap;}
+
+    .sect-grid{display:grid;gap:1.2rem;grid-template-columns:1fr 1fr;}
+    @media(max-width:700px){.sect-grid{grid-template-columns:1fr;}}
+    .full{grid-column:1/-1;}
+
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.3rem;display:flex;flex-direction:column;gap:.4rem;}
+    .card-title{font-size:.88rem;font-weight:700;color:var(--green);display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;}
+    .card-hint{font-size:.72rem;color:var(--text2);line-height:1.5;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.55rem .8rem;}
+    .card-hint.amber{border-color:#4a3000;color:var(--amber);background:#110c00;}
+
+    label{display:block;font-size:.7rem;color:var(--text3);margin:.55rem 0 3px;letter-spacing:.03em;}
+    input,textarea,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.8rem;font-family:var(--mono);outline:none;transition:border-color .15s;}
+    input:focus,textarea:focus,select:focus{border-color:var(--green2);}
+    select{cursor:pointer;}
+
+    .btn{display:block;width:100%;padding:9px 14px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:.78rem;transition:all .15s;margin-top:6px;}
+    .btn.primary{background:var(--green);color:var(--bg);}
+    .btn.primary:hover{background:#4fff7a;}
+    .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text2);}
+    .btn.ghost:hover{border-color:var(--green2);color:var(--green);}
+    .btn.amber-btn{background:var(--amber);color:#0a0600;}
+    .btn.amber-btn:hover{background:#ffc04d;}
+    .btn:disabled{opacity:.35;cursor:not-allowed;}
+    .btn-row{display:flex;flex-wrap:wrap;gap:.4rem;}
+    .btn-row .btn{flex:1;min-width:100px;}
+
+    .status{margin-top:8px;padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:.71rem;line-height:1.65;min-height:40px;border:1px solid var(--border);color:var(--text2);background:var(--bg);word-break:break-all;white-space:pre-wrap;transition:border-color .2s,color .2s;}
+    .status.ok{border-color:#1d5c30;color:#5de87a;}
+    .status.err{border-color:#5a1a1a;color:var(--red);}
+    .status.warn{border-color:#5a3d00;color:var(--amber);}
+    .status.spin{animation:pulse 1.2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+    footer{position:relative;z-index:1;text-align:center;padding:2rem;font-size:.7rem;color:var(--text3);border-top:1px solid var(--border);}
+    footer a{color:var(--text2);}
+
+    ::-webkit-scrollbar{width:6px;}
+    ::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🌿</div>
+    <div>
+      EcoChain Protocol
+      <div class="logo-sub">TIC 29 Web3 · Mirtes Fernanda · Sepolia Testnet</div>
+    </div>
+  </div>
+  <nav>
+    <span class="chip" id="netBadge">Aguardando...</span>
+    <button id="btnConnect">🦊 Conectar MetaMask</button>
+  </nav>
+</header>
+
+<main>
+
+  <div id="fileWarn">
+    <strong>⚠️ Arquivo aberto via <code>file://</code></strong> — MetaMask não funciona neste modo.<br>
+    Use <strong>Live Server</strong> no VS Code <em>(botão direito → Open with Live Server)</em><br>
+    ou execute: <code>node server.js</code> e acesse <strong>http://localhost:3000</strong>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="walletBar">
+    <div>
+      <div class="wstat-label">Carteira</div>
+      <div class="wstat-value hi" id="wAddr">Não conectada</div>
+    </div>
+    <div>
+      <div class="wstat-label">Saldo ECO</div>
+      <div class="wstat-value hi" id="wEco">—</div>
+    </div>
+    <div>
+      <div class="wstat-label">Saldo ETH</div>
+      <div class="wstat-value" id="wEth">—</div>
+    </div>
+    <div>
+      <div class="wstat-label">Em Stake</div>
+      <div class="wstat-value" id="wStake">—</div>
+    </div>
+    <div>
+      <div class="wstat-label">ETH/USD (Chainlink)</div>
+      <div class="wstat-value" id="wPrice">—</div>
+    </div>
+    <div>
+      <div class="wstat-label">APR Atual</div>
+      <div class="wstat-value hi" id="wApr">—</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="lbl">Supply ECO</div><div class="val" id="statSupply">—</div></div>
+    <div class="stat-box"><div class="lbl">Total em Stake</div><div class="val" id="statTotalStaked">—</div></div>
+    <div class="stat-box"><div class="lbl">Certificados NFT</div><div class="val" id="statNFTs">—</div></div>
+    <div class="stat-box"><div class="lbl">Propostas DAO</div><div class="val" id="statProposals">—</div></div>
+    <div class="stat-box"><div class="lbl">Recompensa Pendente</div><div class="val" id="statReward">—</div></div>
+  </div>
+
+  <div class="deploy-table">
+    <h3>📦 Contratos Deployados — Sepolia Testnet (Chain ID 11155111)</h3>
+    <table>
+      <tr><td>EcoToken (ECO)</td><td><code>0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5</code></td><td>Bloco 10692479</td><td><a href="https://sepolia.etherscan.io/address/0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5" target="_blank">Etherscan ↗</a></td></tr>
+      <tr><td>EcoNFT (ECOCERT)</td><td><code>0x9E8A87c068376cFE312E7c6F2d6d1cCF850866C4</code></td><td>Bloco 10692566</td><td><a href="https://sepolia.etherscan.io/address/0x9E8A87c068376cFE312E7c6F2d6d1cCF850866C4" target="_blank">Etherscan ↗</a></td></tr>
+      <tr><td>EcoStaking</td><td><code>0xee24BB958aD56c5BAF4BF6ddb64cE43A802f2374</code></td><td>Bloco 10692558</td><td><a href="https://sepolia.etherscan.io/address/0xee24BB958aD56c5BAF4BF6ddb64cE43A802f2374" target="_blank">Etherscan ↗</a></td></tr>
+      <tr><td>EcoDAO</td><td><code>0x471A9Fbf68095418a86cE71d02347239F6928860</code></td><td>Bloco 10692573</td><td><a href="https://sepolia.etherscan.io/address/0x471A9Fbf68095418a86cE71d02347239F6928860" target="_blank">Etherscan ↗</a></td></tr>
+    </table>
+    <div style="margin-top:.6rem;font-size:.7rem;color:var(--text3)">
+      Owner: <code style="color:#7ee89a">0xB9c084Fd97B1d39B38daA92aC16c41a5D2d7B715</code>
+      &nbsp;·&nbsp; Oracle: Chainlink ETH/USD Sepolia
+    </div>
+  </div>
+
+  <div id="addrSection">
+    <h3>Endereços dos Contratos (editável)</h3>
+    <div class="addr-grid">
+      <div><label>EcoToken (ECO)</label><input id="addrToken" value="0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5"/></div>
+      <div><label>EcoNFT (ECOCERT)</label><input id="addrNFT" value="0x9E8A87c068376cFE312E7c6F2d6d1cCF850866C4"/></div>
+      <div><label>EcoStaking</label><input id="addrStaking" value="0xee24BB958aD56c5BAF4BF6ddb64cE43A802f2374"/></div>
+      <div><label>EcoDAO</label><input id="addrDAO" value="0x471A9Fbf68095418a86cE71d02347239F6928860"/></div>
+    </div>
+    <button class="btn ghost" style="margin-top:.8rem;width:auto;padding:7px 18px" onclick="loadContracts()">✅ Carregar / Recarregar Contratos</button>
+    <div id="stContracts" class="status">Conecte a MetaMask para começar.</div>
+  </div>
+
+  <!-- NFT -->
+  <div class="sect-title"><span>🏅 NFT — Certificados Ambientais</span></div>
+  <div class="sect-grid">
+    <div class="card">
+      <div class="card-title">🌱 Emitir Certificado (Mint)</div>
+      <div class="card-hint amber">Apenas o <strong>owner</strong> pode emitir NFTs. Deixe destinatário vazio para usar sua carteira.</div>
+      <label>Destinatário (vazio = sua carteira)</label>
+      <input id="nftTo" placeholder="0x... (opcional)"/>
+      <label>URI dos Metadados (IPFS)</label>
+      <input id="nftURI" value="ipfs://QmExemplo/projeto1.json"/>
+      <button class="btn primary" onclick="mintNFT()">🌱 Emitir Certificado</button>
+      <button class="btn ghost" onclick="checkNFTOwned()">🔍 Ver meus NFTs</button>
+      <div id="stNFT" class="status">Aguardando...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔢 Consultar NFT por ID</div>
+      <div class="card-hint">Consulte dono e URI de qualquer certificado emitido.</div>
+      <label>ID do Token</label>
+      <input id="nftQueryId" type="number" value="0" min="0"/>
+      <button class="btn primary" onclick="queryNFT()">🔍 Consultar Token</button>
+      <button class="btn ghost" onclick="checkNFTTotal()">📊 Total emitido globalmente</button>
+      <div id="stNFTQuery" class="status">Aguardando...</div>
+    </div>
+  </div>
+
+  <!-- STAKING -->
+  <div class="sect-title"><span>⛏️ Staking de ECO Tokens</span></div>
+  <div class="sect-grid">
+    <div class="card">
+      <div class="card-title">🔒 Depositar Stake</div>
+      <div class="card-hint">Aprova + faz stake em 2 transações automáticas. APR dinâmico via Chainlink ETH/USD.</div>
+      <label>Quantidade de ECO</label>
+      <input id="stakeAmt" type="number" value="1000" min="1"/>
+      <button class="btn primary" onclick="stakeTokens()">⛏️ Fazer Stake</button>
+      <div id="stStake" class="status">Aguardando...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 Recompensas &amp; Unstake</div>
+      <div class="card-hint">APR: 10% base / 15% bônus (ETH &gt; $2000). Veja e resgate recompensas acumuladas.</div>
+      <button class="btn primary" onclick="checkReward()">💰 Ver Recompensa Pendente</button>
+      <button class="btn ghost" onclick="claimReward()">🎁 Resgatar Recompensa</button>
+      <button class="btn ghost" onclick="unstakeTokens()">🔓 Retirar Stake + Recompensa</button>
+      <div id="stReward" class="status">Aguardando...</div>
+    </div>
+  </div>
+
+  <!-- DAO -->
+  <div class="sect-title"><span>🗳️ Governança — DAO</span></div>
+  <div class="sect-grid">
+    <div class="card">
+      <div class="card-title">📝 Criar Proposta</div>
+      <div class="card-hint">Requer mínimo de <strong>1.000 ECO</strong> em carteira para propor.</div>
+      <label>Descrição</label>
+      <textarea id="propDesc" rows="3">Aumentar recompensa de staking para 20% para holders de NFT certificados</textarea>
+      <button class="btn primary" onclick="createProposal()">📝 Criar Proposta</button>
+      <button class="btn ghost" onclick="checkProposalCount()">📊 Total de Propostas</button>
+      <div id="stPropose" class="status">Aguardando...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🗳️ Votar &amp; Consultar</div>
+      <div class="card-hint">Peso do voto = saldo ECO na carteira. Apenas 1 voto por proposta.</div>
+      <label>ID da Proposta</label>
+      <input id="voteId" type="number" value="0" min="0"/>
+      <label>Voto</label>
+      <select id="voteChoice">
+        <option value="true">✅ A Favor</option>
+        <option value="false">❌ Contra</option>
+      </select>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn primary" onclick="castVote()">🗳️ Votar</button>
+        <button class="btn ghost" onclick="loadProposal()">🔍 Consultar</button>
+      </div>
+      <button class="btn ghost" onclick="finalizeProposal()">⚖️ Finalizar Proposta</button>
+      <div id="stVote" class="status">Aguardando...</div>
+    </div>
+  </div>
+
+  <!-- OWNER -->
+  <div class="sect-title"><span>⚙️ Painel do Owner</span></div>
+  <div class="sect-grid">
+    <div class="card">
+      <div class="card-title">💵 Financiar Pool de Recompensas</div>
+      <div class="card-hint amber"><strong>Execute antes de fazer unstake.</strong> Deposita ECO como reserva para pagar recompensas dos stakers. Recomendado: 10.000 ECO.</div>
+      <label>Quantidade de ECO</label>
+      <input id="fundAmt" type="number" value="10000" min="1"/>
+      <button class="btn amber-btn" onclick="fundRewardsFlow()">💰 Aprovar + Depositar Reserva</button>
+      <div id="stFund" class="status">Aguardando...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔨 Executar Proposta Aprovada</div>
+      <div class="card-hint amber">Apenas o owner pode executar. A proposta precisa estar no estado <strong>Aprovada</strong>.</div>
+      <label>ID da Proposta</label>
+      <input id="execId" type="number" value="0" min="0"/>
+      <button class="btn amber-btn" onclick="executeProposal()">⚡ Executar Proposta</button>
+      <div id="stExec" class="status">Aguardando...</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <strong style="color:var(--text2)">EcoChain Protocol</strong> · Mirtes Fernanda Dutra da Silva · TIC 29 Web3<br>
+  Sepolia Testnet ·
+  <a href="https://sepolia.etherscan.io/address/0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5" target="_blank">Etherscan</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+<script>
+"use strict";
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Endereços padrão (Sepolia Testnet) — editáveis no painel da UI
+// ─────────────────────────────────────────────────────────────────────────────
+const DEPLOYED = {
+  token:   "0xb04efd96F2DB1b2b28947B512D4765Bd8274e6f5",
+  nft:     "0x9E8A87c068376cFE312E7c6F2d6d1cCF850866C4",
+  staking: "0xee24BB958aD56c5BAF4BF6ddb64cE43A802f2374",
+  dao:     "0x471A9Fbf68095418a86cE71d02347239F6928860",
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ABIs (apenas funções utilizadas no frontend)
+// ─────────────────────────────────────────────────────────────────────────────
+const ABI_TOKEN = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function totalSupply() view returns (uint256)",
+  "function MAX_SUPPLY() view returns (uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function mint(address to, uint256 amount)",
+  "function burn(uint256 amount)",
+];
+const ABI_NFT = [
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function totalMinted() view returns (uint256)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "function tokenURI(uint256 tokenId) view returns (string)",
+  "function safeMint(address to, string uri) returns (uint256)",
+];
+const ABI_STAKING = [
+  "function stake(uint256 amount)",
+  "function unstake()",
+  "function claimReward()",
+  "function fundRewards(uint256 amount)",
+  "function pendingReward(address user) view returns (uint256)",
+  "function currentEthPrice() view returns (int256)",
+  "function totalStaked() view returns (uint256)",
+  "function stakes(address) view returns (uint256 amount, uint256 startTime, uint256 lastClaim)",
+  "function BASE_APR() view returns (uint256)",
+  "function BONUS_APR() view returns (uint256)",
+];
+const ABI_DAO = [
+  "function propose(string description) returns (uint256)",
+  "function vote(uint256 proposalId, bool inFavor)",
+  "function finalize(uint256 proposalId)",
+  "function execute(uint256 proposalId)",
+  "function proposalCount() view returns (uint256)",
+  "function hasVoted(uint256 proposalId, address voter) view returns (bool)",
+  "function getProposal(uint256 id) view returns (tuple(uint256 id, address proposer, string description, uint256 votesFor, uint256 votesAgainst, uint256 endTime, uint8 state, bool executed))",
+  "function MIN_TOKENS_TO_PROPOSE() view returns (uint256)",
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Estado global
+// ─────────────────────────────────────────────────────────────────────────────
+let provider, signer, account;
+let cToken, cNFT, cStaking, cDAO;
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Helpers de UI
+// ─────────────────────────────────────────────────────────────────────────────
+function gv(id)        { return document.getElementById(id).value.trim(); }
+function set(id, v)    { const el = document.getElementById(id); if (el) el.textContent = v; }
+function fmt(bn)       { return parseFloat(ethers.formatEther(bn)).toLocaleString("pt-BR", { maximumFractionDigits: 4 }); }
+function st(id, msg, cls = "") { const el = document.getElementById(id); if (!el) return; el.textContent = msg; el.className = "status " + cls; }
+function setBadge(text, cls = "") { const b = document.getElementById("netBadge"); b.textContent = text; b.className = "chip " + cls; }
+
+/** Extrai mensagem de erro legível de qualquer exceção ethers/revert */
+function errMsg(e) {
+  // Rejeição pelo usuário na MetaMask
+  if (e.code === 4001 || e.code === "ACTION_REJECTED") return "Transação recusada pelo usuário.";
+  // Custom revert string do contrato (ethers v6)
+  if (e.reason) return e.reason;
+  // Custom errors OZ v5 — ethers v6 expõe e.data com o selector quando não decodifica
+  if (e.data) {
+    const d = typeof e.data === "string" ? e.data : "";
+    if (d.startsWith("0xf4d678b8")) return "Saldo insuficiente no contrato ERC-20.";
+    if (d.startsWith("0xfb8f41b2")) return "Allowance insuficiente. Aprove os tokens primeiro.";
+    if (d.startsWith("0x118cdaa7")) return "Acesso negado: apenas o owner pode executar.";
+  }
+  // Mensagem de revert inline (formato string antigo)
+  const m = e.message || String(e);
+  const matchRev = m.match(/execution reverted[:\s]+"?([^"]+)"?/i);
+  if (matchRev) return matchRev[1];
+  // "unknown custom error" — provavelmente saldo/allowance insuficiente no OZ v5
+  if (m.includes("unknown custom error")) {
+    return "Erro do contrato: saldo ou allowance insuficiente.\n💡 Verifique se o pool de recompensas foi financiado pelo owner.";
+  }
+  // Fallback
+  return m.length > 220 ? m.slice(0, 220) + "…" : m;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Detecção de MetaMask (aguarda injeção assíncrona)
+// ─────────────────────────────────────────────────────────────────────────────
+if (location.protocol === "file:") document.getElementById("fileWarn").style.display = "block";
+
+function waitForEthereum(ms = 4000) {
+  return new Promise(resolve => {
+    if (window.ethereum) return resolve(window.ethereum);
+    const iv = setInterval(() => { if (window.ethereum) { clearInterval(iv); resolve(window.ethereum); } }, 100);
+    setTimeout(() => { clearInterval(iv); resolve(null); }, ms);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Conexão com MetaMask
+// ─────────────────────────────────────────────────────────────────────────────
+document.getElementById("btnConnect").addEventListener("click", connectWallet);
+
+async function connectWallet() {
+  st("stContracts", "⏳ Aguardando MetaMask...", "spin warn");
+  const eth = await waitForEthereum();
+
+  if (!eth) {
+    setBadge("Sem MetaMask", "err");
+    st("stContracts",
+      "❌ MetaMask não encontrada!\n\n" +
+      "• Instale em https://metamask.io\n" +
+      "• Se abriu via file://, execute: node server.js → http://localhost:3000\n" +
+      "• Verifique se a extensão está ativa no navegador", "err");
+    return;
+  }
+
+  try {
+    provider = new ethers.BrowserProvider(eth);
+    await provider.send("eth_requestAccounts", []);
+    signer  = await provider.getSigner();
+    account = await signer.getAddress();
+
+    const net     = await provider.getNetwork();
+    const chainId = Number(net.chainId);
+    const netNames = { 1: "Ethereum Mainnet", 11155111: "Sepolia Testnet", 31337: "Hardhat Local", 5: "Goerli Testnet" };
+    const netName = netNames[chainId] || "Chain " + chainId;
+
+    const btn = document.getElementById("btnConnect");
+    btn.textContent = "✅ " + account.slice(0, 6) + "…" + account.slice(-4);
+    btn.disabled = true;
+    btn.classList.add("connected");
+
+    setBadge(
+      chainId === 11155111 ? "● " + netName : "⚠ " + netName,
+      chainId === 11155111 ? "net" : "warn"
+    );
+
+    // Recarrega a página ao trocar conta ou rede
+    eth.on("accountsChanged", () => location.reload());
+    eth.on("chainChanged",    () => location.reload());
+
+    const networkWarn = chainId !== 11155111
+      ? "\n\n⚠️ Você está em \"" + netName + "\" (" + chainId + ").\nTroque para Sepolia (11155111) na MetaMask."
+      : "";
+
+    st("stContracts",
+      "✅ Conectado!\nCarteira: " + account + "\nRede: " + netName + " (" + chainId + ")" + networkWarn,
+      chainId === 11155111 ? "ok" : "warn");
+
+    await loadContracts();
+    await refreshDashboard();
+
+  } catch (e) {
+    st("stContracts", "❌ " + errMsg(e), "err");
+    setBadge("Erro", "err");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Carregar contratos a partir dos endereços nos inputs
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadContracts() {
+  if (!signer) { st("stContracts", "⚠️ Conecte a MetaMask primeiro.", "warn"); return; }
+
+  // Lê endereços dos inputs (permite uso com outros deploys)
+  const ta = gv("addrToken"), na = gv("addrNFT"), sa = gv("addrStaking"), da = gv("addrDAO");
+  let msg = "";
+
+  try {
+    if (ta && ethers.isAddress(ta)) {
+      cToken = new ethers.Contract(ta, ABI_TOKEN, signer);
+      const [sym, name, bal] = await Promise.all([cToken.symbol(), cToken.name(), cToken.balanceOf(account)]);
+      msg += "✅ EcoToken — " + name + " (" + sym + ")\n   Saldo: " + fmt(bal) + " " + sym + "\n";
+    } else if (ta) {
+      msg += "❌ EcoToken — endereço inválido\n";
+    }
+
+    if (na && ethers.isAddress(na)) {
+      cNFT = new ethers.Contract(na, ABI_NFT, signer);
+      const [name, total] = await Promise.all([cNFT.name(), cNFT.totalMinted()]);
+      msg += "✅ EcoNFT — " + name + " · " + total + " certificado(s)\n";
+    } else if (na) {
+      msg += "❌ EcoNFT — endereço inválido\n";
+    }
+
+    if (sa && ethers.isAddress(sa)) {
+      cStaking = new ethers.Contract(sa, ABI_STAKING, signer);
+      const total = await cStaking.totalStaked();
+      let ps = "oracle indisponível";
+      try {
+        const p = await cStaking.currentEthPrice();
+        ps = "$" + (Number(p) / 1e8).toFixed(2) + " (Chainlink)";
+      } catch (_) {}
+      msg += "✅ EcoStaking — ETH/USD: " + ps + " | Em stake: " + fmt(total) + " ECO\n";
+    } else if (sa) {
+      msg += "❌ EcoStaking — endereço inválido\n";
+    }
+
+    if (da && ethers.isAddress(da)) {
+      cDAO = new ethers.Contract(da, ABI_DAO, signer);
+      const c = await cDAO.proposalCount();
+      msg += "✅ EcoDAO — " + c + " proposta(s)\n";
+    } else if (da) {
+      msg += "❌ EcoDAO — endereço inválido\n";
+    }
+
+    if (!msg) { st("stContracts", "⚠️ Preencha os endereços dos contratos.", "warn"); return; }
+
+    const hasErr = msg.includes("❌");
+    st("stContracts", msg.trim(), hasErr ? "warn" : "ok");
+
+    if (!hasErr) await refreshDashboard();
+
+  } catch (e) {
+    st("stContracts", "❌ Erro ao carregar contratos:\n" + errMsg(e), "err");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dashboard — atualiza todos os stats visíveis
+// ─────────────────────────────────────────────────────────────────────────────
+async function refreshDashboard() {
+  if (!signer || !account) return;
+
+  try {
+    const ethBal = await provider.getBalance(account);
+    set("wAddr", account.slice(0, 8) + "…" + account.slice(-6));
+    set("wEth",  parseFloat(ethers.formatEther(ethBal)).toFixed(4) + " ETH");
+  } catch (_) {}
+
+  if (cToken) {
+    try {
+      const [bal, ts] = await Promise.all([cToken.balanceOf(account), cToken.totalSupply()]);
+      set("wEco",       fmt(bal) + " ECO");
+      set("statSupply", fmt(ts)  + " ECO");
+    } catch (_) {}
+  }
+
+  if (cNFT) {
+    try { set("statNFTs", (await cNFT.totalMinted()).toString()); } catch (_) {}
+  }
+
+  if (cStaking) {
+    try {
+      const [totalStaked, stakeInfo, reward] = await Promise.all([
+        cStaking.totalStaked(),
+        cStaking.stakes(account),
+        cStaking.pendingReward(account),
+      ]);
+      set("wStake",         fmt(stakeInfo.amount) + " ECO");
+      set("statTotalStaked", fmt(totalStaked)      + " ECO");
+      set("statReward",      fmt(reward)           + " ECO");
+
+      let aprLabel = "10% (base)";
+      try {
+        const p   = await cStaking.currentEthPrice();
+        const usd = Number(p) / 1e8;
+        set("wPrice", "$" + usd.toFixed(2));
+        aprLabel = usd > 2000 ? "15% bônus ✨" : "10% base";
+      } catch (_) {}
+      set("wApr", aprLabel);
+    } catch (_) {}
+  }
+
+  if (cDAO) {
+    try { set("statProposals", (await cDAO.proposalCount()).toString()); } catch (_) {}
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  NFT
+// ─────────────────────────────────────────────────────────────────────────────
+async function mintNFT() {
+  if (!cNFT) { st("stNFT", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const toRaw = gv("nftTo");
+  if (toRaw && !ethers.isAddress(toRaw)) { st("stNFT", "❌ Endereço do destinatário inválido.", "err"); return; }
+  const to  = toRaw || account;
+  const uri = gv("nftURI");
+  if (!uri) { st("stNFT", "❌ Informe a URI dos metadados.", "err"); return; }
+
+  st("stNFT", "⏳ Enviando mint…\nConfirme na MetaMask.", "spin warn");
+  try {
+    const tx = await cNFT.safeMint(to, uri);
+    st("stNFT", "⏳ Aguardando confirmação…\nTx: " + tx.hash, "warn");
+    const rc    = await tx.wait();
+    const total = await cNFT.totalMinted();
+    st("stNFT",
+      "✅ NFT mintado!\nTx: " + rc.hash +
+      "\nDestinatário: " + to +
+      "\nURI: " + uri +
+      "\nTotal emitido: " + total, "ok");
+    await refreshDashboard();
+  } catch (e) {
+    const m = errMsg(e);
+    const h = m.includes("OwnableUnauthorizedAccount") || m.includes("Ownable")
+      ? "\n💡 Apenas o owner (0xB9c084…) pode mintar." : "";
+    st("stNFT", "❌ " + m + h, "err");
+  }
+}
+
+async function checkNFTOwned() {
+  if (!cNFT) { st("stNFT", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  st("stNFT", "⏳ Consultando…", "warn");
+  try {
+    const [name, sym, bal, total] = await Promise.all([
+      cNFT.name(), cNFT.symbol(), cNFT.balanceOf(account), cNFT.totalMinted(),
+    ]);
+    st("stNFT",
+      "🏅 " + name + " (" + sym + ")\n" +
+      "Seus certificados: " + bal + "\n" +
+      "Total emitido (global): " + total, "ok");
+  } catch (e) { st("stNFT", "❌ " + errMsg(e), "err"); }
+}
+
+async function queryNFT() {
+  if (!cNFT) { st("stNFTQuery", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const idRaw = gv("nftQueryId");
+  if (idRaw === "" || isNaN(Number(idRaw)) || Number(idRaw) < 0) {
+    st("stNFTQuery", "❌ Informe um ID de token válido (ex: 0, 1, 2…).", "err"); return;
+  }
+  const id = Number(idRaw);
+  st("stNFTQuery", "⏳ Consultando token #" + id + "…", "warn");
+  try {
+    const total = await cNFT.totalMinted();
+    if (id >= Number(total)) {
+      st("stNFTQuery",
+        "⚠️ Token #" + id + " não existe.\nTotal emitido: " + total +
+        " (IDs válidos: 0 a " + (Number(total) - 1) + ")", "warn");
+      return;
+    }
+    const [owner, uri] = await Promise.all([cNFT.ownerOf(id), cNFT.tokenURI(id)]);
+    st("stNFTQuery", "🔍 Token #" + id + "\nDono: " + owner + "\nURI: " + uri, "ok");
+  } catch (e) { st("stNFTQuery", "❌ " + errMsg(e), "err"); }
+}
+
+async function checkNFTTotal() {
+  if (!cNFT) { st("stNFTQuery", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  try {
+    const [name, total] = await Promise.all([cNFT.name(), cNFT.totalMinted()]);
+    st("stNFTQuery", "📊 " + name + ": " + total + " certificado(s) emitido(s) no total.", "ok");
+  } catch (e) { st("stNFTQuery", "❌ " + errMsg(e), "err"); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Staking
+//  FIX: approve usa o endereço real do contrato cStaking (não o hardcoded DEPLOYED)
+//  para suportar edição manual dos endereços nos inputs.
+// ─────────────────────────────────────────────────────────────────────────────
+async function stakeTokens() {
+  if (!cStaking || !cToken) { st("stStake", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const amt = gv("stakeAmt");
+  if (amt === "" || isNaN(Number(amt)) || Number(amt) <= 0) {
+    st("stStake", "❌ Informe uma quantidade válida (ex: 1000).", "err"); return;
+  }
+  const wei = ethers.parseEther(String(Number(amt)));
+
+  try {
+    const bal = await cToken.balanceOf(account);
+    if (bal < wei) {
+      st("stStake",
+        "❌ Saldo insuficiente!\nVocê tem: " + fmt(bal) + " ECO\nNecessário: " + amt + " ECO", "err");
+      return;
+    }
+
+    // Verifica stake ativo para dar mensagem clara antes de gastar gas
+    const existingStake = await cStaking.stakes(account);
+    if (existingStake.amount > 0n) {
+      st("stStake",
+        "⚠️ Você já tem stake ativo de " + fmt(existingStake.amount) + " ECO.\n" +
+        "💡 Faça unstake primeiro antes de depositar novamente.", "warn");
+      return;
+    }
+
+    // Usa o endereço real do contrato carregado (suporta endereço editável)
+    const stakingAddr = await cStaking.getAddress();
+
+    st("stStake", "⏳ [1/2] Aprovando " + amt + " ECO…\nConfirme na MetaMask.", "spin warn");
+    const ap = await cToken.approve(stakingAddr, wei);
+    await ap.wait();
+
+    st("stStake", "⏳ [2/2] Fazendo stake…\nConfirme na MetaMask.", "spin warn");
+    const tx = await cStaking.stake(wei);
+    const rc = await tx.wait();
+
+    const info = await cStaking.stakes(account);
+    let ps = "indisponível", as = "10% ao ano";
+    try {
+      const p = await cStaking.currentEthPrice();
+      const usd = Number(p) / 1e8;
+      ps = "$" + usd.toFixed(2);
+      as = usd > 2000 ? "15% bônus (ETH > $2000)" : "10% base";
+    } catch (_) {}
+
+    st("stStake",
+      "✅ Stake realizado!\nTx: " + rc.hash +
+      "\nEm stake: " + fmt(info.amount) + " ECO" +
+      "\nETH/USD: " + ps + "\nAPR: " + as, "ok");
+    await refreshDashboard();
+
+  } catch (e) {
+    const m = errMsg(e);
+    st("stStake", "❌ " + m, "err");
+  }
+}
+
+async function checkReward() {
+  if (!cStaking) { st("stReward", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  st("stReward", "⏳ Consultando…", "warn");
+  try {
+    const [reward, info] = await Promise.all([
+      cStaking.pendingReward(account),
+      cStaking.stakes(account),
+    ]);
+    let ps = "indisponível", as = "10% (base)";
+    try {
+      const p = await cStaking.currentEthPrice();
+      const usd = Number(p) / 1e8;
+      ps = "$" + usd.toFixed(2);
+      as = usd > 2000 ? "15% (bônus)" : "10% (base)";
+    } catch (_) {}
+    const since = info.lastClaim > 0n
+      ? new Date(Number(info.lastClaim) * 1000).toLocaleString("pt-BR") : "—";
+
+    if (info.amount === 0n) {
+      st("stReward", "ℹ️ Você não tem stake ativo no momento.", "warn");
+      return;
+    }
+
+    st("stReward",
+      "💰 Recompensa pendente: " + fmt(reward) + " ECO\n" +
+      "📊 Em stake: " + fmt(info.amount) + " ECO\n" +
+      "📈 APR: " + as + " | ETH/USD: " + ps + "\n" +
+      "🕐 Último claim: " + since, "ok");
+  } catch (e) { st("stReward", "❌ " + errMsg(e), "err"); }
+}
+
+async function claimReward() {
+  if (!cStaking) { st("stReward", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  st("stReward", "⏳ Resgatando recompensa…\nConfirme na MetaMask.", "spin warn");
+  try {
+    const [pending, info] = await Promise.all([
+      cStaking.pendingReward(account),
+      cStaking.stakes(account),
+    ]);
+    if (info.amount === 0n) {
+      st("stReward", "⚠️ Você não tem stake ativo.", "warn"); return;
+    }
+    if (pending === 0n) {
+      st("stReward", "⚠️ Sem recompensa pendente ainda.\n💡 Aguarde algum tempo após o stake.", "warn"); return;
+    }
+    const tx = await cStaking.claimReward();
+    const rc = await tx.wait();
+    st("stReward",
+      "✅ Recompensa resgatada!\nTx: " + rc.hash +
+      "\n" + fmt(pending) + " ECO enviados para sua carteira.", "ok");
+    await refreshDashboard();
+  } catch (e) {
+    const m = errMsg(e);
+    const h = m.includes("reserva insuficiente")
+      ? "\n💡 O pool de recompensas está vazio. Peça ao owner para financiar com 'Depositar Reserva'." : "";
+    st("stReward", "❌ " + m + h, "err");
+  }
+}
+
+async function unstakeTokens() {
+  if (!cStaking) { st("stReward", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+
+  // ── Verificações pré-transação (sem gastar gás) ─────────────────────────
+  let info;
+  try { info = await cStaking.stakes(account); } catch (e) {
+    st("stReward", "❌ Erro ao consultar stake:\n" + errMsg(e), "err"); return;
+  }
+  if (!info || info.amount === 0n) {
+    st("stReward", "⚠️ Você não tem stake ativo para retirar.", "warn"); return;
+  }
+
+  const principal = info.amount;
+
+  // Checa saldo real do contrato EcoStaking — ele precisa ter ao menos o principal
+  // (os tokens chegam ao contrato via transferFrom no momento do stake)
+  if (cToken) {
+    let contractBal;
+    try {
+      const stakingAddr = await cStaking.getAddress();
+      contractBal = await cToken.balanceOf(stakingAddr);
+    } catch (_) { contractBal = null; }
+
+    if (contractBal !== null && contractBal < principal) {
+      const falta = principal - contractBal;
+      st("stReward",
+        "❌ O pool EcoStaking não tem ECO suficiente para devolver seu stake.\n\n" +
+        "📊 Seu principal:       " + fmt(principal)    + " ECO\n" +
+        "📦 Saldo do contrato:  " + fmt(contractBal)   + " ECO\n" +
+        "🔴 Diferença:           " + fmt(falta)         + " ECO\n\n" +
+        "💡 Peça ao owner para depositar ao menos " + fmt(falta) +
+        " ECO via 'Depositar Reserva' antes de fazer unstake.", "err");
+      return;
+    }
+  }
+
+  // ── Monta preview para o usuário antes de abrir a MetaMask ──────────────
+  let pending = 0n;
+  let previewLine = "\nPrincipal: " + fmt(principal) + " ECO";
+  try {
+    pending = await cStaking.pendingReward(account);
+    previewLine += "\nRecompensa estimada: " + fmt(pending) + " ECO";
+    try {
+      const p = await cStaking.currentEthPrice();
+      previewLine += " | ETH/USD: $" + (Number(p)/1e8).toFixed(2);
+    } catch (_) {}
+  } catch (_) {}
+
+  st("stReward", "⏳ Retirando stake e recompensa…\nConfirme na MetaMask." + previewLine, "spin warn");
+
+  // ── Envia a transação ────────────────────────────────────────────────────
+  try {
+    const tx = await cStaking.unstake();
+    st("stReward", "⏳ Aguardando confirmação na rede…\nTx: " + tx.hash, "warn");
+    const rc = await tx.wait();
+    st("stReward",
+      "✅ Unstake concluído!\n" +
+      "Tx: " + rc.hash + "\n\n" +
+      "💰 Principal devolvido: " + fmt(principal) + " ECO" +
+      (pending > 0n ? "\n🎁 Recompensa incluída: " + fmt(pending) + " ECO" : ""), "ok");
+    await refreshDashboard();
+  } catch (e) {
+    // Extrai o revertData para decodificação manual do custom error OZ v5
+    const raw = e?.revert?.args || e?.data || e?.error?.data || "";
+    const dataStr = typeof raw === "string" ? raw : (raw?.data || "");
+
+    let msg = errMsg(e);
+
+    // Se ainda caiu em "unknown custom error", tenta extrair pelo revertData completo
+    if (msg.includes("unknown custom error") || msg.includes("Erro do contrato")) {
+      // Neste ponto sabemos que a transferência de ERC-20 falhou.
+      // Verificamos se realmente é falta de saldo no contrato
+      if (cToken) {
+        try {
+          const stakingAddr = await cStaking.getAddress();
+          const bal = await cToken.balanceOf(stakingAddr);
+          if (bal < principal) {
+            st("stReward",
+              "❌ Saldo insuficiente no pool EcoStaking.\n\n" +
+              "📦 Saldo do contrato: " + fmt(bal) + " ECO\n" +
+              "📊 Necessário:         " + fmt(principal) + " ECO\n\n" +
+              "💡 Use 'Depositar Reserva' no Painel do Owner para financiar o pool.", "err");
+            return;
+          }
+        } catch (_) {}
+      }
+      // Fallback genérico informativo
+      st("stReward",
+        "❌ Falha na transação de unstake.\n\n" +
+        "Possíveis causas:\n" +
+        "• O pool EcoStaking não tem ECO suficiente\n" +
+        "• O owner precisa depositar tokens via 'Depositar Reserva'\n\n" +
+        "Detalhe técnico: " + (e?.message || String(e)).slice(0, 120), "err");
+      return;
+    }
+
+    st("stReward", "❌ " + msg, "err");
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DAO
+// ─────────────────────────────────────────────────────────────────────────────
+async function createProposal() {
+  if (!cDAO) { st("stPropose", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const desc = gv("propDesc");
+  if (!desc) { st("stPropose", "❌ Informe a descrição da proposta.", "err"); return; }
+
+  if (cToken) {
+    const bal = await cToken.balanceOf(account).catch(() => 0n);
+    if (bal < ethers.parseEther("1000")) {
+      st("stPropose",
+        "❌ Saldo insuficiente para propor.\nVocê tem: " + fmt(bal) + " ECO\nMínimo: 1.000 ECO", "err");
+      return;
+    }
+  }
+
+  st("stPropose", "⏳ Criando proposta…\nConfirme na MetaMask.", "spin warn");
+  try {
+    const tx = await cDAO.propose(desc);
+    const rc  = await tx.wait();
+    const c   = await cDAO.proposalCount();
+    st("stPropose",
+      "✅ Proposta criada!\nID: " + (Number(c) - 1) +
+      "\nTx: " + rc.hash, "ok");
+    await refreshDashboard();
+  } catch (e) {
+    const m = errMsg(e);
+    const h = m.includes("tokens insuficientes")
+      ? "\n💡 Você precisa de ao menos 1.000 ECO para criar propostas." : "";
+    st("stPropose", "❌ " + m + h, "err");
+  }
+}
+
+async function checkProposalCount() {
+  if (!cDAO) { st("stPropose", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  try {
+    st("stPropose", "📊 Total de propostas criadas: " + (await cDAO.proposalCount()), "ok");
+  } catch (e) { st("stPropose", "❌ " + errMsg(e), "err"); }
+}
+
+async function castVote() {
+  if (!cDAO) { st("stVote", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const idRaw   = gv("voteId");
+  const inFavor = gv("voteChoice") === "true";
+
+  if (idRaw === "" || isNaN(Number(idRaw)) || Number(idRaw) < 0) {
+    st("stVote", "❌ Informe um ID de proposta válido (ex: 0).", "err"); return;
+  }
+  const id = Number(idRaw);
+
+  st("stVote", "⏳ Verificando proposta…", "warn");
+  try {
+    // Verificações pré-transação para feedback imediato
+    const voted = await cDAO.hasVoted(id, account);
+    if (voted) { st("stVote", "⚠️ Você já votou nesta proposta.", "warn"); return; }
+
+    const proposal = await cDAO.getProposal(id);
+    if (proposal.endTime === 0n) {
+      st("stVote", "❌ Proposta #" + id + " não existe.", "err"); return;
+    }
+    if (proposal.state !== 0) {
+      const states = ["Ativa", "Aprovada", "Rejeitada", "Executada"];
+      st("stVote", "⚠️ Proposta não está ativa. Estado atual: " + (states[Number(proposal.state)] || "?"), "warn");
+      return;
+    }
+    if (BigInt(Math.floor(Date.now() / 1000)) >= proposal.endTime) {
+      st("stVote", "⚠️ Período de votação encerrado. Use 'Finalizar Proposta'.", "warn"); return;
+    }
+
+    let weightLabel = "";
+    if (cToken) {
+      const bal = await cToken.balanceOf(account);
+      if (bal === 0n) {
+        st("stVote", "❌ Você não tem ECO para votar (peso = saldo ECO).", "err"); return;
+      }
+      weightLabel = " com peso " + fmt(bal) + " ECO";
+    }
+
+    st("stVote",
+      "⏳ Registrando voto " + (inFavor ? "A FAVOR" : "CONTRA") + weightLabel + "…\nConfirme na MetaMask.",
+      "spin warn");
+
+    const tx = await cDAO.vote(id, inFavor);
+    const rc = await tx.wait();
+    st("stVote",
+      "✅ Voto registrado!\nProposta #" + id + " — " + (inFavor ? "A FAVOR ✅" : "CONTRA ❌") +
+      "\nTx: " + rc.hash, "ok");
+  } catch (e) { st("stVote", "❌ " + errMsg(e), "err"); }
+}
+
+async function loadProposal() {
+  if (!cDAO) { st("stVote", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const idRaw = gv("voteId");
+  if (idRaw === "" || isNaN(Number(idRaw)) || Number(idRaw) < 0) {
+    st("stVote", "❌ Informe um ID de proposta válido (ex: 0).", "err"); return;
+  }
+  const id = Number(idRaw);
+  st("stVote", "⏳ Consultando proposta #" + id + "…", "warn");
+  try {
+    const [p, voted] = await Promise.all([cDAO.getProposal(id), cDAO.hasVoted(id, account)]);
+    if (p.endTime === 0n) { st("stVote", "❌ Proposta #" + id + " não existe.", "err"); return; }
+
+    const states    = ["🟢 Ativa", "✅ Aprovada", "❌ Rejeitada", "⚡ Executada"];
+    const end       = new Date(Number(p.endTime) * 1000).toLocaleString("pt-BR");
+    const remaining = Number(p.endTime) - Math.floor(Date.now() / 1000);
+    const timeLeft  = remaining > 0
+      ? Math.floor(remaining / 3600) + "h " + Math.floor((remaining % 3600) / 60) + "min restantes"
+      : "Período encerrado";
+
+    st("stVote",
+      "📄 Proposta #" + id +
+      "\nPropositor: " + p.proposer +
+      "\nDescrição: " + p.description +
+      "\n\n✅ Votos a favor:  " + fmt(p.votesFor)     + " ECO" +
+      "\n❌ Votos contra: "    + fmt(p.votesAgainst)  + " ECO" +
+      "\n\nEncerra: " + end + " (" + timeLeft + ")" +
+      "\nEstado: " + (states[Number(p.state)] || "?") +
+      "\nVocê votou: " + (voted ? "Sim ✅" : "Não"), "ok");
+  } catch (e) { st("stVote", "❌ " + errMsg(e), "err"); }
+}
+
+async function finalizeProposal() {
+  if (!cDAO) { st("stVote", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const idRaw = gv("voteId");
+  if (idRaw === "" || isNaN(Number(idRaw))) {
+    st("stVote", "❌ Informe um ID de proposta válido.", "err"); return;
+  }
+  const id = Number(idRaw);
+  st("stVote", "⏳ Finalizando proposta #" + id + "…\nConfirme na MetaMask.", "spin warn");
+  try {
+    const tx = await cDAO.finalize(id);
+    const rc = await tx.wait();
+    st("stVote", "✅ Proposta #" + id + " finalizada!\nTx: " + rc.hash, "ok");
+  } catch (e) {
+    const m = errMsg(e);
+    const h = m.includes("periodo ativo") || m.includes("período ativo")
+      ? "\n💡 Aguarde o período de votação (3 dias) encerrar para finalizar." : "";
+    st("stVote", "❌ " + m + h, "err");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Painel do Owner
+//  FIX: approve usa getAddress() do cStaking carregado, não DEPLOYED.staking
+// ─────────────────────────────────────────────────────────────────────────────
+async function fundRewardsFlow() {
+  if (!signer) { st("stFund", "⚠️ Conecte a MetaMask primeiro.", "warn"); return; }
+
+  // Garante instâncias a partir dos endereços nos inputs (não hardcoded)
+  const ta = gv("addrToken"), sa = gv("addrStaking");
+  if (!ethers.isAddress(ta) || !ethers.isAddress(sa)) {
+    st("stFund", "❌ Endereços de EcoToken e EcoStaking precisam estar preenchidos.", "err"); return;
+  }
+  if (!cToken)   cToken   = new ethers.Contract(ta, ABI_TOKEN,   signer);
+  if (!cStaking) cStaking = new ethers.Contract(sa, ABI_STAKING, signer);
+
+  const amt = gv("fundAmt");
+  if (amt === "" || isNaN(Number(amt)) || Number(amt) <= 0) {
+    st("stFund", "❌ Informe uma quantidade válida (ex: 10000).", "err"); return;
+  }
+  const wei = ethers.parseEther(String(Number(amt)));
+
+  try {
+    const bal = await cToken.balanceOf(account);
+    if (bal < wei) {
+      st("stFund",
+        "❌ Saldo insuficiente!\nVocê tem: " + fmt(bal) + " ECO\nNecessário: " + amt + " ECO", "err");
+      return;
+    }
+
+    // FIX: usa endereço real do contrato cStaking
+    const stakingAddr = await cStaking.getAddress();
+
+    st("stFund", "⏳ [1/2] Aprovando " + amt + " ECO…\nConfirme na MetaMask.", "spin warn");
+    const ap = await cToken.approve(stakingAddr, wei);
+    await ap.wait();
+
+    st("stFund", "✅ Aprovação OK!\n⏳ [2/2] Depositando no EcoStaking…\nConfirme na MetaMask.", "warn");
+    const tx = await cStaking.fundRewards(wei);
+    const rc = await tx.wait();
+    const nb = await cToken.balanceOf(stakingAddr);
+    st("stFund",
+      "✅ Reserva depositada!\nTx: " + rc.hash +
+      "\nSaldo do EcoStaking: " + fmt(nb) + " ECO", "ok");
+    await refreshDashboard();
+  } catch (e) {
+    const m = errMsg(e);
+    const h = m.includes("Ownable") ? "\n💡 Apenas o owner pode financiar o pool de recompensas." : "";
+    st("stFund", "❌ " + m + h, "err");
+  }
+}
+
+async function executeProposal() {
+  if (!cDAO) { st("stExec", "⚠️ Carregue os contratos primeiro.", "warn"); return; }
+  const idRaw = gv("execId");
+  if (idRaw === "" || isNaN(Number(idRaw))) {
+    st("stExec", "❌ Informe um ID de proposta válido.", "err"); return;
+  }
+  const id = Number(idRaw);
+  st("stExec", "⏳ Executando proposta #" + id + "…\nConfirme na MetaMask.", "spin warn");
+  try {
+    const tx = await cDAO.execute(id);
+    const rc = await tx.wait();
+    st("stExec", "✅ Proposta #" + id + " executada!\nTx: " + rc.hash, "ok");
+  } catch (e) {
+    const m = errMsg(e);
+    const h1 = (m.includes("nao aprovada") || m.includes("não aprovada"))
+      ? "\n💡 A proposta precisa estar 'Aprovada' para ser executada." : "";
+    const h2 = m.includes("Ownable")
+      ? "\n💡 Apenas o owner pode executar propostas." : "";
+    const h3 = m.includes("ja executada") || m.includes("já executada")
+      ? "\n💡 Esta proposta já foi executada anteriormente." : "";
+    st("stExec", "❌ " + m + h1 + h2 + h3, "err");
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Auto-reconectar se MetaMask já estava conectada (melhora UX no reload)
+// ─────────────────────────────────────────────────────────────────────────────
+window.addEventListener("load", async () => {
+  const eth = await waitForEthereum(1500);
+  if (!eth) return;
+  try {
+    const accounts = await eth.request({ method: "eth_accounts" });
+    if (accounts && accounts.length > 0) await connectWallet();
+  } catch (_) {}
+});
+</script>
+</body>
+</html>
